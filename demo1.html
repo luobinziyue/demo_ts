@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <div class='wrapper'></div>
+    <script>
+        //es6类的内部所有定义的方法，都是不可枚举的
+        //ES5 构造函数内部定义的方法就是可枚举的
+        //类不存在变量提升（hoist），这一点与 ES5 完全不同
+        const createDOMFromString = (domString) => {
+            const div = document.createElement('div')
+            div.innerHTML = domString
+            return div
+        }
+        class LikeButton {
+            constructor() {
+                this.state = {isLiked:false};
+            }
+
+            setState(state) {
+                const oldEl = this.el;
+                this.state = state;
+                this.el = this.render();
+                if(this.onStateChange ) this.onStateChange(oldEl,this.el);
+                
+            }
+
+            changeLikeText() {
+                this.setState({
+                    isLiked: !this.state.isLiked
+                })               
+            }
+
+            render() {
+               this.el = createDOMFromString(`<button class='like-button'>
+                <span class='like-text'>${this.state.isLiked?'取消':'点赞'}</span>
+                <span>2</span>
+                </button>`)
+                this.el.addEventListener('click',()=>{
+                    console.log(1,this)
+                    this.changeLikeText();
+                },false)
+                return this.el;
+            }
+        }
+        const wrapper = document.querySelector('.wrapper');
+        const likeButton = new LikeButton();
+        wrapper.appendChild(likeButton.render());
+        const likeButton2 = new LikeButton();
+        // wrapper.innerHTML = likeButton.render();
+        // wrapper.innerHTML = likeButton2.render();
+        likeButton.onStateChange = (oldEl,newEl)=>{
+            wrapper.insertBefore(newEl,oldEl);
+            wrapper.removeChild(oldEl);
+            
+        }
+        // console.log(2,likeButton.onStateChange)
+        // console.log(3,likeButton2.onStateChange) undefined
+        //这里发现实例对象新增的属性别的实例对象无法使用
+        //insertBefore 指定的已有子节点之前插入新的子节点
+        //第一个参数，插入的新节点，第二个参数，需要插入的位置
+   
+    </script>
+</body>
+</html>
